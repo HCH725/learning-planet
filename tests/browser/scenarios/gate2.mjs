@@ -59,10 +59,11 @@ export const gate2Scenarios = [
       check('點動物有短動畫', true);
       check('點動物會報名字', (await forestStatus(page)).includes('兔子'), await forestStatus(page));
       const afterTap = await diag(page);
-      check('第一次觸控解鎖 WebAudio', afterTap.audio.unlocked === true && afterTap.audio.state === 'running', JSON.stringify(afterTap.audio));
+      check('只點兔子不發出假叫聲', afterTap.audio.state === 'none', JSON.stringify(afterTap.audio));
 
       // Rapid taps must not stack voices.
       for (let index = 0; index < 8; index += 1) await page.tap('[data-animal="dog"]');
+      await page.waitFor('window.__lp.diag().audio.dropped > 0', { timeout: 3000 });
       const storm = await diag(page);
       check('連點不會超過 sfx 上限 6', storm.audio.activeByKind.sfx <= 6, JSON.stringify(storm.audio.activeByKind));
       check('連點被 cooldown 丟棄而非堆疊', storm.audio.dropped > 0, JSON.stringify(storm.audio));
@@ -71,6 +72,8 @@ export const gate2Scenarios = [
       await page.drag('[data-food="carrot"]', '[data-animal="rabbit"]');
       await page.waitFor('document.querySelector(".forest-status").textContent.includes("吃了")', { timeout: 2000 });
       check('拖曳紅蘿蔔給兔子會吃掉', (await forestStatus(page)).includes('兔子吃了紅蘿蔔'));
+      await page.waitFor('window.__lp.diag().audio.activeByKind.sfx > 0', { timeout: 3000 });
+      check('餵兔子會排程咀嚼錄音', true);
 
       // Wrong drop: carrot onto the duck returns quietly, no error styling, no sound.
       await page.drag('[data-food="carrot"]', '[data-animal="duck"]');

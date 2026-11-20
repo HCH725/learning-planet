@@ -19,7 +19,8 @@ export type Tone = {
 export type SoundSpec = {
   id: string;
   kind: VoiceKind;
-  tones: Tone[];
+  tones?: Tone[];
+  buffer?: AudioBuffer;
   cooldownMs?: number;
 };
 
@@ -86,6 +87,7 @@ export type AudioSnapshot = {
 
 export type AudioEngine = {
   unlock(): Promise<boolean>;
+  decode(bytes: ArrayBuffer): Promise<AudioBuffer | undefined>;
   play(spec: SoundSpec): boolean;
   stopAll(fadeSeconds?: number): void;
   setMaster(value: number): void;
@@ -117,6 +119,7 @@ export function createAudioEngine(options: {
   const enabled: Record<VoiceKind, boolean> = { sfx: true, voice: true, music: true };
   const lastPlayed = new Map<string, number>();
   let generation = 0;
+  const recordings = new Set<AudioBufferSourceNode>();
 
   const ensureContext = (): AudioContextLike | null => {
     if (disposed) return null;
@@ -151,6 +154,14 @@ export function createAudioEngine(options: {
       return ctx.state === 'running' || ctx.state === 'interrupted';
     },
 
+    async decode(bytes) {
+      try {
+        return await (context as unknown as AudioContext | null)?.decodeAudioData(bytes.slice(0));
+      } catch {
+        return undefined;
+      }
+    },
+
     play(spec) {
       if (disposed) return false;
       const ctx = context;
@@ -183,7 +194,26 @@ export function createAudioEngine(options: {
       lastPlayed.set(spec.id, stamp);
       const startedAt = ctx.currentTime;
       const voiceGeneration = generation;
-      for (const tone of spec.tones) {
+      if (spec.buffer) {
+        const node = (ctx as unknown as AudioContext).createBufferSource();
+        node.buffer = spec.buffer;
+        node.connect(masterGain as unknown as AudioNode);
+        node.onended = () => {
+          if (recordings.delete(node)) releaseVoice(spec.kind);
+          node.disconnect();
+        };
+        try {
+          node.start();
+        } catch {
+          node.disconnect();
+          return false;
+        }
+        recordings.add(node);
+        active += 1;
+        activeByKind[spec.kind] += 1;
+        return true;
+      }
+      for (const tone of spec.tones ?? []) {
         const start = startedAt + (tone.at ?? 0);
         const end = start + Math.max(tone.dur, 0.02);
         const gainNode = ctx.createGain();
@@ -232,6 +262,12 @@ export function createAudioEngine(options: {
     },
 
     stopAll() {
+      for (const node of recordings) {
+        node.onended = null;
+        try { node.stop(); } catch { /* already stopped */ }
+        node.disconnect();
+      }
+      recordings.clear();
       generation += 1;
       active = 0;
       activeByKind.sfx = 0;

@@ -4,7 +4,7 @@
  * food up and tap an animal (the non-drag alternative WCAG 2.5.7 asks for).
  * A wrong drop is never an error: the food just returns.
  */
-import { getAudio, type SoundSpec } from '../../shared/audio';
+import { getAudio } from '../../shared/audio';
 import { el } from '../../shared/dom';
 import { createScope, type Disposable } from '../../shared/lifecycle';
 import { requestPin } from '../../shared/parent-gate';
@@ -19,56 +19,6 @@ import {
   type AnimalId,
   type FoodId,
 } from './forest-model';
-
-/**
- * Synthesised animal calls. These are clearly engineering test sounds, not
- * approved recordings; the "voice" channel is a short motif, not human speech.
- */
-const CALLS: Record<AnimalId, SoundSpec> = {
-  rabbit: {
-    id: 'call-rabbit',
-    kind: 'sfx',
-    cooldownMs: 220,
-    tones: [
-      { freq: 520, to: 660, dur: 0.1, type: 'triangle', gain: 0.16 },
-      { freq: 720, dur: 0.08, type: 'triangle', gain: 0.14, at: 0.11 },
-    ],
-  },
-  duck: {
-    id: 'call-duck',
-    kind: 'sfx',
-    cooldownMs: 220,
-    tones: [
-      { freq: 360, to: 300, dur: 0.12, type: 'sawtooth', gain: 0.1 },
-      { freq: 310, to: 260, dur: 0.12, type: 'sawtooth', gain: 0.1, at: 0.14 },
-    ],
-  },
-  dog: {
-    id: 'call-dog',
-    kind: 'sfx',
-    cooldownMs: 220,
-    tones: [
-      { freq: 210, to: 140, dur: 0.14, type: 'square', gain: 0.09 },
-      { freq: 180, to: 120, dur: 0.12, type: 'square', gain: 0.08, at: 0.17 },
-    ],
-  },
-};
-
-const NAME_MOTIFS: Record<AnimalId, SoundSpec> = {
-  rabbit: { id: 'name-rabbit', kind: 'voice', cooldownMs: 600, tones: [{ freq: 660, dur: 0.09 }, { freq: 880, dur: 0.12, at: 0.1 }] },
-  duck: { id: 'name-duck', kind: 'voice', cooldownMs: 600, tones: [{ freq: 440, dur: 0.1 }, { freq: 554, dur: 0.12, at: 0.11 }] },
-  dog: { id: 'name-dog', kind: 'voice', cooldownMs: 600, tones: [{ freq: 330, dur: 0.1 }, { freq: 415, dur: 0.12, at: 0.11 }] },
-};
-
-const EAT: SoundSpec = {
-  id: 'eat',
-  kind: 'sfx',
-  cooldownMs: 160,
-  tones: [
-    { freq: 300, to: 520, dur: 0.12, type: 'triangle', gain: 0.15 },
-    { freq: 640, dur: 0.1, type: 'triangle', gain: 0.13, at: 0.12 },
-  ],
-};
 
 const ANIMAL_LABEL: Record<AnimalId, string> = { rabbit: '兔子', duck: '小鴨', dog: '小狗' };
 const FOOD_LABEL: Record<FoodId, string> = { carrot: '紅蘿蔔', bread: '麵包' };
@@ -89,26 +39,28 @@ export function renderForest(host: HTMLElement): Disposable {
     status.textContent = text;
   };
 
-  // Start unlock inside the completed gesture; touch-down may not grant activation.
-  // Coalesce taps while resuming, so a slow resume cannot replay a burst later.
-  let pendingSound: Promise<boolean> | undefined;
+  // Prefetch only on the forest route; decoding waits for the shared context.
+  const recordingIds = ['duck', 'dog', 'rabbit'] as const;
+  const bytes = new Map(recordingIds.map((id) => [id, fetch(`/assets/preschool/audio/${id}.mp3`)
+    .then((res) => res.ok ? res.arrayBuffer() : undefined).catch(() => undefined)]));
+  const buffers = new Map<AnimalId, Promise<AudioBuffer | undefined>>();
   let soundEpoch = 0;
   scope.on(document, 'visibilitychange', () => { if (document.hidden) soundEpoch++; });
-  const playFromGesture = (...sounds: SoundSpec[]) => {
-    if (document.hidden || store.read().audio.master === 0) return;
-    if (audio.snapshot().state === 'running') {
-      for (const sound of sounds) audio.play(sound);
-      return;
+  const playFromGesture = async (id: AnimalId) => {
+    const enabled = () => !document.hidden && store.read().audio.master > 0 && store.read().audio.sfx;
+    if (!enabled()) return;
+    const epoch = ++soundEpoch;
+    // Invoke resume while this gesture still owns user activation.
+    if (!await audio.unlock()) return;
+    let decoding = buffers.get(id);
+    if (!decoding) {
+      decoding = bytes.get(id)!.then((data) => data && audio.decode(data));
+      buffers.set(id, decoding);
     }
-    const epoch = soundEpoch;
-    const unlock = audio.unlock();
-    pendingSound = unlock;
-    void unlock.then((ready) => {
-      if (pendingSound !== unlock) return;
-      pendingSound = undefined;
-      if (!ready || scope.disposed || document.hidden || epoch !== soundEpoch) return;
-      for (const sound of sounds) audio.play(sound);
-    });
+    const buffer = await decoding;
+    if (buffer && !scope.disposed && enabled() && epoch === soundEpoch) {
+      audio.play({ id: `recording-${id}`, kind: 'sfx', cooldownMs: 400, buffer });
+    }
   };
 
   const animalButtons = new Map<AnimalId, HTMLButtonElement>();
@@ -145,6 +97,7 @@ export function renderForest(host: HTMLElement): Disposable {
     muteButton.setAttribute('aria-pressed', String(muted));
   };
   scope.on(muteButton, 'click', () => {
+    soundEpoch++;
     const current = store.read().audio.master;
     store.update((value) => ({ ...value, audio: { ...value.audio, master: current === 0 ? 0.65 : 0 } }));
     syncMute();
@@ -170,7 +123,7 @@ export function renderForest(host: HTMLElement): Disposable {
       button.classList.add('is-petting');
       scope.timeout(() => button.classList.remove('is-petting'), 520);
     }
-    playFromGesture(CALLS[animalId], NAME_MOTIFS[animalId]);
+    if (animalId !== 'rabbit') void playFromGesture(animalId);
     setStatus(ANIMAL_LABEL[animalId]);
   };
 
@@ -185,7 +138,7 @@ export function renderForest(host: HTMLElement): Disposable {
         animalButton.classList.add('is-eating');
         scope.timeout(() => animalButton.classList.remove('is-eating'), 760);
       }
-      playFromGesture(EAT);
+      if (animalId === 'rabbit') void playFromGesture(animalId);
       setStatus(`${ANIMAL_LABEL[animalId]}吃了${FOOD_LABEL[foodId]}！`);
     } else {
       // Deliberately no error colour, no failure sound, no score change.
