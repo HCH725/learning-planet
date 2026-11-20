@@ -89,9 +89,27 @@ export function renderForest(host: HTMLElement): Disposable {
     status.textContent = text;
   };
 
-  // Unlock/resume audio inside a real gesture. Cheap and idempotent.
-  scope.on(document, 'pointerdown', () => void audio.unlock(), { passive: true });
-  scope.on(document, 'keydown', () => void audio.unlock());
+  // Start unlock inside the completed gesture; touch-down may not grant activation.
+  // Coalesce taps while resuming, so a slow resume cannot replay a burst later.
+  let pendingSound: Promise<boolean> | undefined;
+  let soundEpoch = 0;
+  scope.on(document, 'visibilitychange', () => { if (document.hidden) soundEpoch++; });
+  const playFromGesture = (...sounds: SoundSpec[]) => {
+    if (document.hidden || store.read().audio.master === 0) return;
+    if (audio.snapshot().state === 'running') {
+      for (const sound of sounds) audio.play(sound);
+      return;
+    }
+    const epoch = soundEpoch;
+    const unlock = audio.unlock();
+    pendingSound = unlock;
+    void unlock.then((ready) => {
+      if (pendingSound !== unlock) return;
+      pendingSound = undefined;
+      if (!ready || scope.disposed || document.hidden || epoch !== soundEpoch) return;
+      for (const sound of sounds) audio.play(sound);
+    });
+  };
 
   const animalButtons = new Map<AnimalId, HTMLButtonElement>();
   const animalRow = el('ul', { class: 'animal-row', attrs: { 'aria-label': '動物' } });
@@ -152,8 +170,7 @@ export function renderForest(host: HTMLElement): Disposable {
       button.classList.add('is-petting');
       scope.timeout(() => button.classList.remove('is-petting'), 520);
     }
-    audio.play(CALLS[animalId]);
-    audio.play(NAME_MOTIFS[animalId]);
+    playFromGesture(CALLS[animalId], NAME_MOTIFS[animalId]);
     setStatus(ANIMAL_LABEL[animalId]);
   };
 
@@ -168,7 +185,7 @@ export function renderForest(host: HTMLElement): Disposable {
         animalButton.classList.add('is-eating');
         scope.timeout(() => animalButton.classList.remove('is-eating'), 760);
       }
-      audio.play(EAT);
+      playFromGesture(EAT);
       setStatus(`${ANIMAL_LABEL[animalId]}吃了${FOOD_LABEL[foodId]}！`);
     } else {
       // Deliberately no error colour, no failure sound, no score change.
@@ -199,7 +216,6 @@ export function renderForest(host: HTMLElement): Disposable {
     scope.on(button, 'pointerdown', (event) => {
       const down = event as PointerEvent;
       if (down.pointerType === 'mouse' && down.button !== 0) return;
-      void audio.unlock();
       const startX = down.clientX;
       const startY = down.clientY;
       const pointerId = down.pointerId;

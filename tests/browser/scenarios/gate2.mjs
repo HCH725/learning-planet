@@ -12,6 +12,35 @@ async function diag(page) {
 
 export const gate2Scenarios = [
   {
+    id: 'gate2-touch-first-sound',
+    title: '首次觸控等待音訊解鎖，仍播放同一次點擊的音效',
+    device: { mobile: true, width: 390, height: 844, deviceScaleFactor: 3 },
+    async run({ page, check }) {
+      await page.send('Page.addScriptToEvaluateOnNewDocument', {
+        source: `
+          let released = false;
+          let unlocked = false;
+          window.addEventListener('pointerup', () => { released = true; }, { capture: true });
+          const Audio = window.AudioContext;
+          const resume = Audio.prototype.resume;
+          const state = Object.getOwnPropertyDescriptor(BaseAudioContext.prototype, 'state').get;
+          Object.defineProperty(Audio.prototype, 'state', {
+            get() { return unlocked ? state.call(this) : 'suspended'; },
+          });
+          Audio.prototype.resume = function () {
+            if (!released || !navigator.userActivation.isActive) return Promise.reject(new Error('No release activation'));
+            return Promise.all([resume.call(this), new Promise(resolve => setTimeout(resolve, 80))])
+              .then(() => { unlocked = true; });
+          };
+        `,
+      });
+      await page.goto(FOREST);
+      await page.tap('[data-animal="duck"]');
+      await page.waitFor('window.__lp.diag().audio.activeByKind.sfx === 1', { timeout: 1500 });
+      check('同一次小鴨觸控確實安排了發聲', (await diag(page)).audio.dropped === 0);
+    },
+  },
+  {
     id: 'gate2-forest-core',
     title: '動物森林：三動物兩食物、點擊、拖曳、錯誤投放、替代操作',
     device: { mobile: true, width: 390, height: 844, deviceScaleFactor: 3 },
@@ -99,17 +128,11 @@ export const gate2Scenarios = [
       await page.setVisibility(false);
       const visibleAgain = await diag(page);
       check('回前景會嘗試 resume', ['running', 'suspended'].includes(visibleAgain.audio.state), JSON.stringify(visibleAgain.audio));
-      // Headless Chrome has no audio device: after a script-initiated suspend the
-      // context may stay suspended. The app resumes on the next gesture; whether
-      // the hardware context really returns to running is a real-device check (待驗).
+      // Becoming visible does not replay old sounds. A new gesture may play.
+      check('回前景沒有自動重播音效', visibleAgain.audio.active === 0, JSON.stringify(visibleAgain.audio));
       await page.click('[data-animal="dog"]');
-      const afterGesture = await diag(page);
-      check('回前景後沒有偷偷發聲（active 為 0）', afterGesture.audio.active === 0, JSON.stringify(afterGesture.audio));
-      check(
-        '回前景後 resume 已嘗試且狀態一致（headless 無音訊裝置；硬體恢復列真機待驗）',
-        ['running', 'suspended'].includes(afterGesture.audio.state) && (await page.eval('return document.documentElement.dataset.pageHidden')) === undefined,
-        JSON.stringify(afterGesture.audio),
-      );
+      await page.waitFor('window.__lp.diag().audio.activeByKind.sfx > 0', { timeout: 3000 });
+      check('回前景後的新手勢可以觸發音效', (await diag(page)).audio.state === 'running');
 
       // Mute: immediate, aria-pressed, persisted across reload.
       await page.click('[data-testid="mute-toggle"]');
