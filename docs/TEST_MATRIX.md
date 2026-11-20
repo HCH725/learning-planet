@@ -8,5 +8,9 @@
 | 2 | 點三種動物、拖放／放錯、取消、連點、五分鐘持續操作、前背景、鎖屏、返回、旋轉、靜音、減動態、PIN | iPhone、iPad、Android、desktop 矩陣；註明真機或遠端／模擬 |
 | 2 | 音訊手勢解鎖、背景停止、回前景可操作、離區清理；鍵盤、主要觸控目標與拖曳替代 | 實際聽測、性能記錄、鍵盤／觸控紀錄、清理驗證 |
 | 2 | 獨立審計 | 同一個 PR head SHA、預覽 URL、證據、結論 |
+| 1 | （自動化）入口／幼兒路由、WebGL 封鎖、reduced motion、行動觸控、路由 teardown | `npm run test:browser` → `evidence/browser/report.json`；6 個場景，桌面＋390×844 觸控模擬 |
+| 2 | （自動化）森林三動物兩食物、點擊、拖曳、錯放、替代操作（點選＋鍵盤）、連點音訊上限、背景暫停、靜音持久、pointercancel、PIN 建立／錯誤／解鎖／離開攔阻、teardown | 同上；4 個場景 |
+| 2 | （自動化）單元／邏輯：路由比對、世界契約、lifecycle、設定解析與 PIN 雜湊、音訊引擎限制、餵食矩陣 | `npm test`（node --test，含 TS 直跑） |
+| 2 | 真機（iPhone／iPad／Android）、線上 Cloudflare Pages、正式 headers、真人聽測與幼兒實測 | **待驗**：由整合／審計檢查卡收口 |
 
 沒有實機或預覽結果的項目標未驗，不以桌面或設定檔替代。

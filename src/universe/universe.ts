@@ -5,6 +5,7 @@
 import { WORLDS } from '../content/worlds';
 import { el } from '../shared/dom';
 import { createScope, type Disposable } from '../shared/lifecycle';
+import { getSettingsStore } from '../shared/settings';
 import { renderWorldCards } from './fallback';
 import { mountPlanet, webgl2Available, type PlanetHandle } from './planet';
 
@@ -36,7 +37,7 @@ export function renderUniverse(host: HTMLElement): Disposable {
   renderWorldCards(stage, WORLDS);
 
   const reduced = prefersReducedMotion();
-  const listOnly = forceListMode() || reduced || !webgl2Available();
+  const listOnly = forceListMode() || reduced || getSettingsStore().read().reducedMotion || !webgl2Available();
   stage.dataset.mode = listOnly ? 'list' : 'planet';
 
   let planet: PlanetHandle | null = null;

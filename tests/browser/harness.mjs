@@ -313,8 +313,30 @@ export class Page {
   }
 
   async key(key, code = key, keyCode = 0) {
-    await this.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: keyCode });
-    await this.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: keyCode });
+    const text = key === 'Enter' ? '\r' : undefined;
+    await this.send('Input.dispatchKeyEvent', {
+      type: 'keyDown',
+      key,
+      code,
+      windowsVirtualKeyCode: keyCode,
+      nativeVirtualKeyCode: keyCode,
+      text,
+      unmodifiedText: text,
+    });
+    await this.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: keyCode, nativeVirtualKeyCode: keyCode });
+  }
+
+  /** Sets a form value and fires the events the app listens to. Not a trusted gesture. */
+  async fill(selector, value) {
+    await this.eval(`
+      const node = document.querySelector(${JSON.stringify(selector)});
+      if (!node) throw new Error('missing ' + ${JSON.stringify(selector)});
+      node.focus();
+      node.value = ${JSON.stringify(value)};
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+      node.dispatchEvent(new Event('change', { bubbles: true }));
+      return node.value;
+    `);
   }
 
   async blockWebgl() {
