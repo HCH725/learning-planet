@@ -1,10 +1,251 @@
 :root {
-  font-family: system-ui, sans-serif;
-  color-scheme: light dark;
+  color-scheme: dark;
+  --ink: #f7f3ea;
+  --ink-dim: #cfc8b8;
+  --space-0: #0d1024;
+  --space-1: #171c3a;
+  --card: rgba(255, 255, 255, 0.08);
+  --card-edge: rgba(255, 255, 255, 0.22);
+  --accent: #ffd166;
+  --focus: #8be9fd;
+  --preschool-0: #fff4dc;
+  --preschool-1: #ffe0b2;
+  --preschool-ink: #3a2a12;
+  --radius: 22px;
+  --target: 72px;
 }
 
-main {
-  max-inline-size: 42rem;
-  margin: 12vh auto;
-  padding-inline: 1.25rem;
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: 'Noto Sans TC', 'PingFang TC', 'Hiragino Sans', system-ui, sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #26305c 0%, transparent 60%),
+    linear-gradient(180deg, var(--space-1) 0%, var(--space-0) 100%);
+  background-attachment: fixed;
+  line-height: 1.6;
+}
+
+#app {
+  min-height: 100dvh;
+}
+
+.screen {
+  max-inline-size: 68rem;
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2.5rem) clamp(1rem, 4vw, 2rem) 3rem;
+}
+
+h1 {
+  font-size: clamp(1.6rem, 4vw, 2.4rem);
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--ink-dim);
+}
+
+/* ---------- universe entrance ---------- */
+
+.universe-header {
+  margin-block-end: 1.25rem;
+}
+
+.planet-stage {
+  position: relative;
+  display: grid;
+  gap: 1.25rem;
+  min-block-size: 26rem;
+}
+
+.planet-canvas {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  touch-action: pan-y;
+  cursor: grab;
+  z-index: 0;
+}
+
+/* Cards must stay above the absolutely-positioned canvas so taps reach links. */
+.planet-stage .world-list {
+  position: relative;
+  z-index: 1;
+}
+
+.planet-stage[data-mode='planet'] .world-list {
+  align-self: end;
+  margin-block-start: auto;
+  background: linear-gradient(180deg, transparent, rgba(13, 16, 36, 0.86) 45%);
+  padding-block-start: 4rem;
+}
+
+.stage-note {
+  align-self: start;
+  font-size: 0.95rem;
+}
+
+.world-list,
+.zone-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.world-card,
+.zone-card {
+  min-block-size: var(--target);
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.25rem 0.9rem;
+  padding: 1rem 1.15rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--card-edge);
+  background: var(--card);
+  color: inherit;
+  text-decoration: none;
+}
+
+.world-card:hover,
+.zone-card:hover {
+  border-color: var(--accent);
+  background: rgba(255, 209, 102, 0.14);
+}
+
+.world-card__icon,
+.zone-card__icon {
+  grid-row: span 2;
+  font-size: 2.1rem;
+  line-height: 1;
+}
+
+.world-card__title,
+.zone-card__title {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.world-card__state,
+.zone-card__hint {
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+}
+
+.world-card--locked,
+.zone-card--locked {
+  opacity: 0.55;
+  border-style: dashed;
+}
+
+/* ---------- preschool hub ---------- */
+
+.screen[data-route='preschool'] {
+  color: var(--preschool-ink);
+}
+
+.screen[data-route='preschool'] .zone-card__title {
+  color: var(--preschool-ink);
+}
+
+.screen[data-route='preschool'] .preschool-blurb,
+.screen[data-route='preschool'] .zone-card__hint,
+.screen[data-route='preschool'] .preschool-note {
+  color: #6b5330;
+}
+
+body:has(.screen[data-route='preschool']) {
+  background:
+    radial-gradient(900px 600px at 20% 0%, #ffe9c9 0%, transparent 65%),
+    linear-gradient(180deg, var(--preschool-0) 0%, var(--preschool-1) 100%);
+}
+
+.screen[data-route='preschool'] .zone-card {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(122, 88, 34, 0.28);
+  box-shadow: 0 10px 24px rgba(122, 88, 34, 0.12);
+  min-block-size: 9rem;
+}
+
+.screen[data-route='preschool'] .zone-card__icon {
+  font-size: 3rem;
+}
+
+.screen[data-route='preschool'] .zone-card__title {
+  font-size: 1.5rem;
+}
+
+.preschool-header {
+  margin-block-end: 1.5rem;
+}
+
+.preschool-note {
+  margin-block-start: 1.5rem;
+  font-size: 0.95rem;
+}
+
+/* ---------- shared chrome ---------- */
+
+.back-link {
+  display: inline-block;
+  min-block-size: 2.75rem;
+  min-inline-size: 4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.notfound-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+:where(a, button):focus-visible {
+  outline: 4px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* In-app reduced motion uses the same switch shape as the OS preference. */
+:root[data-reduced-motion='true'] *,
+:root[data-reduced-motion='true'] *::before,
+:root[data-reduced-motion='true'] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
+
+@media (max-width: 30rem) {
+  .world-list,
+  .zone-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,0 +1,252 @@
+{
+  "startedAt": "2026-11-20T09:34:43.687Z",
+  "finishedAt": "2026-11-20T09:34:49.397Z",
+  "chrome": "Google Chrome for Testing 148.0.7778.96",
+  "baseUrl": "http://127.0.0.1:4173",
+  "mode": "headless",
+  "results": [
+    {
+      "id": "gate1-universe-desktop",
+      "title": "桌面：星球入口有 3D 或清單，且世界清單可導航",
+      "ok": true,
+      "ms": 283,
+      "checks": [
+        {
+          "label": "入口渲染 universe 路由",
+          "ok": true,
+          "detail": "got universe"
+        },
+        {
+          "label": "世界清單有五個世界",
+          "ok": true,
+          "detail": "got 5"
+        },
+        {
+          "label": "只有 preschool 可以進入",
+          "ok": true,
+          "detail": "[{\"title\":\"學齡前幼兒樂園\",\"href\":\"/world/preschool\",\"locked\":false}]"
+        },
+        {
+          "label": "模式與 canvas 一致",
+          "ok": true,
+          "detail": "mode=planet canvas=1"
+        },
+        {
+          "label": "WebGL2 可用時載入 3D 星球",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "3D 星球載入 three chunk",
+          "ok": true,
+          "detail": "no three request"
+        },
+        {
+          "label": "入口沒有 console error",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有第三方請求",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate1-preschool-no-three",
+      "title": "幼兒路由不載入 Three.js chunk（直接 deep link，生產 build）",
+      "ok": true,
+      "ms": 317,
+      "checks": [
+        {
+          "label": "deep link 直接進入 preschool",
+          "ok": true,
+          "detail": "got preschool"
+        },
+        {
+          "label": "幼兒首頁有四張大卡",
+          "ok": true,
+          "detail": "got 4"
+        },
+        {
+          "label": "動物森林是唯一可玩的區域",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "幼兒路由完全沒有 three 請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "幼兒路由沒有 canvas",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "對照組：入口確實會載入 three chunk",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-webgl-blocked",
+      "title": "WebGL 被封鎖時仍能完整導航（不是錯誤頁）",
+      "ok": true,
+      "ms": 379,
+      "checks": [
+        {
+          "label": "無 WebGL 時顯示清單模式",
+          "ok": true,
+          "detail": "mode=list"
+        },
+        {
+          "label": "無 WebGL 時不建立 canvas",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "無 WebGL 時入口仍可導航",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "清單可進入幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "fallback 不是錯誤頁",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-reduced-motion",
+      "title": "prefers-reduced-motion 明顯減少動態（並保留對照組）",
+      "ok": true,
+      "ms": 344,
+      "checks": [
+        {
+          "label": "瀏覽器回報 reduced motion",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "reduced motion 時不啟動 3D",
+          "ok": true,
+          "detail": "mode=list"
+        },
+        {
+          "label": "reduced motion 時說明文字存在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "reduced motion 時沒有 three 請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "對照組：偏好可還原",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-mobile-hub",
+      "title": "行動模擬（390×844 觸控）：大目標、可導航、不溢出",
+      "ok": true,
+      "ms": 897,
+      "checks": [
+        {
+          "label": "四個遊戲區都顯示",
+          "ok": true,
+          "detail": "got 4"
+        },
+        {
+          "label": "每個遊戲區 ≥ 72px 高",
+          "ok": true,
+          "detail": "[{\"width\":358,\"height\":144},{\"width\":358,\"height\":144},{\"width\":358,\"height\":144},{\"width\":358,\"height\":144}]"
+        },
+        {
+          "label": "沒有水平溢出",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "觸控可回到星球",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "觸控可再進入幼兒樂園",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-teardown",
+      "title": "路由往返 4 次後沒有殘留 scope／timer／listener",
+      "ok": true,
+      "ms": 2475,
+      "checks": [
+        {
+          "label": "入口有 app + 畫面兩個 scope",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":9}"
+        },
+        {
+          "label": "第 1 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 2 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 3 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 4 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "往返後 scope 數量回到 2",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":9}"
+        },
+        {
+          "label": "往返後沒有殘留 timer",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":9}"
+        },
+        {
+          "label": "往返後沒有殘留 listener",
+          "ok": true,
+          "detail": "9 -> 9"
+        },
+        {
+          "label": "RAF 數量與目前畫面一致",
+          "ok": true,
+          "detail": "1 vs 1"
+        },
+        {
+          "label": "指標 element 沒有殘留 canvas 堆疊",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    }
+  ]
+}
