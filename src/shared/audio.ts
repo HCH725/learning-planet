@@ -152,8 +152,14 @@ export function createAudioEngine(options: {
     },
 
     play(spec) {
+      if (disposed) return false;
       const ctx = context;
-      if (disposed || !ctx || !masterGain) return false;
+      if (!ctx || !masterGain) {
+        // Before the first gesture there is no context: the attempt is dropped,
+        // and diagnostics must say so instead of silently ignoring it.
+        dropped += 1;
+        return false;
+      }
       if (muted || !enabled[spec.kind]) {
         dropped += 1;
         return false;
