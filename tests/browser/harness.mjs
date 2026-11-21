@@ -313,7 +313,7 @@ export class Page {
   }
 
   async key(key, code = key, keyCode = 0) {
-    const text = key === 'Enter' ? '\r' : undefined;
+    const text = key === 'Enter' ? '\r' : key.length === 1 ? key : undefined;
     await this.send('Input.dispatchKeyEvent', {
       type: 'keyDown',
       key,

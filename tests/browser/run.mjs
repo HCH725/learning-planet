@@ -7,10 +7,11 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { Cdp, Page, launchChrome, startServer } from './harness.mjs';
 import { gate1Scenarios } from './scenarios/gate1.mjs';
 import { gate2Scenarios } from './scenarios/gate2.mjs';
+import { gate3Scenarios } from './scenarios/gate3.mjs';
 
 const only = process.argv.find((arg) => arg.startsWith('--only='))?.slice('--only='.length) ?? '';
 const headed = process.argv.includes('--headed');
-const scenarios = [...gate1Scenarios, ...gate2Scenarios].filter((scenario) => !only || scenario.id.includes(only));
+const scenarios = [...gate1Scenarios, ...gate2Scenarios, ...gate3Scenarios].filter((scenario) => !only || scenario.id.includes(only));
 
 const startedAt = new Date();
 const results = [];

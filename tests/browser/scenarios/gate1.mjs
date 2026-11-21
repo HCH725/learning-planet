@@ -76,7 +76,12 @@ export const gate1Scenarios = [
         }));
       `);
       check('幼兒首頁有四張大卡', zones.length === 4, `got ${zones.length}`);
-      check('動物森林是唯一可玩的區域', zones.filter((zone) => zone.href).length === 1 && zones.find((zone) => zone.href)?.href === '/world/preschool/forest');
+      check(
+        '四區都是可玩的區域',
+        zones.filter((zone) => zone.href).length === 4 &&
+          ['forest', 'bubbles', 'music', 'shapes'].every((id) => zones.some((zone) => zone.href === `/world/preschool/${id}`)),
+        JSON.stringify(zones),
+      );
       check('幼兒路由完全沒有 three 請求', threeRequested(page).length === 0, threeRequested(page).join(','));
       check('幼兒路由沒有 canvas', (await page.eval('return document.querySelectorAll("canvas").length')) === 0);
 

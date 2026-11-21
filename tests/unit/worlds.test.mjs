@@ -27,9 +27,12 @@ test('world metadata carries the minimal contract fields', () => {
   assert.equal(new Set(WORLDS.map((w) => w.id)).size, WORLDS.length, 'world ids must be unique');
 });
 
-test('preschool exposes exactly one playable zone in this increment', () => {
+test('preschool exposes four playable zones', () => {
   const playable = PRESCHOOL_ZONES.filter((z) => z.enabled);
-  assert.deepEqual(playable.map((z) => z.id), ['forest']);
-  assert.equal(playable[0].route, '/world/preschool/forest');
-  assert.equal(PRESCHOOL_ZONES.length, 4, 'the hub still advertises the four planned zones');
+  assert.deepEqual(playable.map((z) => z.id), ['forest', 'bubbles', 'music', 'shapes']);
+  assert.equal(PRESCHOOL_ZONES.length, 4);
+  for (const zone of playable) {
+    assert.equal(zone.route, `/world/preschool/${zone.id}`);
+    assert.ok(zone.hint.length > 0);
+  }
 });

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { matchRoute, ROUTES } from '../../src/router.ts';
+import { isZoneId, matchRoute, ROUTES } from '../../src/router.ts';
 
 test('universe root maps to the planet entrance', () => {
   assert.deepEqual(matchRoute('/'), { name: 'universe', path: '/' });
@@ -30,13 +30,25 @@ test('trailing slashes are tolerated but normalised', () => {
 
 test('unknown routes resolve to not-found instead of throwing', () => {
   assert.equal(matchRoute('/nope').name, 'not-found');
-  assert.equal(matchRoute('/world/preschool/bubbles').name, 'not-found');
+  assert.equal(matchRoute('/world/preschool/dino').name, 'not-found');
+  assert.equal(matchRoute('/world/science/forest').name, 'not-found');
 });
 
-test('a zone that is not enabled is not routable yet', () => {
-  for (const zone of ['bubbles', 'music', 'shapes']) {
-    assert.equal(matchRoute(`/world/preschool/${zone}`).name, 'not-found', `${zone} must not route before Gate 3`);
+test('all four preschool zones are routable', () => {
+  for (const zone of ['forest', 'bubbles', 'music', 'shapes']) {
+    assert.deepEqual(matchRoute(`/world/preschool/${zone}`), {
+      name: 'zone',
+      world: 'preschool',
+      zone,
+      path: `/world/preschool/${zone}`,
+    });
   }
+});
+
+test('isZoneId accepts only shipped zones', () => {
+  for (const zone of ['forest', 'bubbles', 'music', 'shapes']) assert.equal(isZoneId(zone), true);
+  assert.equal(isZoneId('dino'), false);
+  assert.equal(isZoneId(''), false);
 });
 
 test('route table exposes every matchable path', () => {
