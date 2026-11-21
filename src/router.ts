@@ -3,6 +3,7 @@
  * a pure matcher (unit-tested) plus pushState + a single delegated click handler.
  */
 import type { Scope } from './shared/lifecycle';
+import type { ZoneId } from './shared/settings';
 
 export type Route =
   | { name: 'universe'; path: string }
@@ -19,7 +20,12 @@ export const ROUTES = [
   { name: 'parent', pattern: '/parent' },
 ] as const;
 
-const ENABLED_ZONES = new Set(['forest']);
+const ENABLED_ZONES = new Set<ZoneId>(['forest', 'bubbles', 'music', 'shapes']);
+
+/** Route guard helper: zone ids that actually exist in this increment. */
+export function isZoneId(value: string): value is ZoneId {
+  return ENABLED_ZONES.has(value as ZoneId);
+}
 
 export function normalisePath(input: string): string {
   const raw = (input.split(/[?#]/, 1)[0] ?? '').trim();
@@ -34,7 +40,7 @@ export function matchRoute(input: string): Route {
   if (path === '/world/preschool') return { name: 'preschool', path };
   if (path === '/parent') return { name: 'parent', path };
   const zoneMatch = /^\/world\/([a-z-]+)\/([a-z-]+)$/.exec(path);
-  if (zoneMatch && zoneMatch[1] === 'preschool' && ENABLED_ZONES.has(zoneMatch[2])) {
+  if (zoneMatch && zoneMatch[1] === 'preschool' && isZoneId(zoneMatch[2]!)) {
     return { name: 'zone', world: zoneMatch[1], zone: zoneMatch[2], path };
   }
   return { name: 'not-found', path };

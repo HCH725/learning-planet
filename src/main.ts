@@ -1,9 +1,10 @@
 import './app.css';
+import { PRESCHOOL_ZONES } from './content/worlds';
 import { matchRoute, startRouter, type Route } from './router';
 import { audioDiagnostics, getAudio } from './shared/audio';
 import { el } from './shared/dom';
 import { createScope, diagnostics, type Disposable } from './shared/lifecycle';
-import { getSettingsStore } from './shared/settings';
+import { getSettingsStore, type ZoneId } from './shared/settings';
 import { renderUniverse } from './universe/universe';
 
 const root = document.querySelector<HTMLElement>('#app');
@@ -25,6 +26,7 @@ function applySettings(): void {
   audio.setEnabled('music', settings.audio.music);
   audio.setEnabled('sfx', settings.audio.sfx);
   audio.setEnabled('voice', settings.audio.voice);
+  audio.setEnabled('instrument', settings.audio.sfx);
   audio.setMuted(settings.audio.master === 0);
   audio.setMaster(settings.audio.master);
 }
@@ -32,6 +34,18 @@ function applySettings(): void {
 applySettings();
 
 type Screen = (host: HTMLElement) => Disposable | Promise<Disposable>;
+
+/** Every zone is a lazy chunk: none of them pulls in the three.js universe. */
+const ZONE_SCREENS: Record<string, () => Promise<Screen>> = {
+  forest: async () => (await import('./worlds/preschool/forest')).renderForest,
+  bubbles: async () => (await import('./worlds/preschool/bubbles')).renderBubbles,
+  music: async () => (await import('./worlds/preschool/music')).renderMusic,
+  shapes: async () => (await import('./worlds/preschool/shapes')).renderShapes,
+};
+
+function zoneMeta(zone: string) {
+  return PRESCHOOL_ZONES.find((entry) => entry.id === zone);
+}
 
 const appScope = createScope('app');
 let current: Disposable | null = null;
@@ -41,7 +55,7 @@ let currentRoute: Route = matchRoute(location.pathname + location.search);
 function titleFor(route: Route): string {
   if (route.name === 'universe') return 'Learning Planet 學習星球';
   if (route.name === 'preschool') return '學齡前幼兒樂園 · Learning Planet';
-  if (route.name === 'zone') return '動物森林 · Learning Planet';
+  if (route.name === 'zone') return `${zoneMeta(route.zone)?.title ?? '遊戲區'} · Learning Planet`;
   if (route.name === 'parent') return '家長區 · Learning Planet';
   return '找不到這個星球角落 · Learning Planet';
 }
@@ -60,14 +74,44 @@ function renderNotFound(host: HTMLElement): Disposable {
   return { dispose() {} };
 }
 
+/**
+ * A zone the parent switched off is not an error. It is a calm resting page
+ * with a way back and a way to the parent settings; no PIN prompt here.
+ */
+function renderZoneRest(host: HTMLElement, title: string): Disposable {
+  host.append(
+    el(
+      'header',
+      { class: 'preschool-header' },
+      el('a', { class: 'back-link', text: '← 回幼兒樂園', attrs: { href: '/world/preschool' } }),
+      el('h1', { class: 'preschool-title', text: title }),
+    ),
+    el(
+      'div',
+      { class: 'zone-rest', attrs: { 'data-zone-rest': 'true' } },
+      el('p', { class: 'zone-rest__icon', text: '🌙', attrs: { 'aria-hidden': 'true' } }),
+      el('p', { class: 'zone-rest__text', text: '這一區正在休息。家長可以在設定裡打開。' }),
+      el(
+        'p',
+        { class: 'zone-rest__actions' },
+        el('a', { class: 'tool-button', text: '家長設定', attrs: { href: '/parent' } }),
+        el('a', { class: 'tool-button', text: '回幼兒樂園', attrs: { href: '/world/preschool' } }),
+      ),
+    ),
+  );
+  return { dispose() {} };
+}
+
 async function screenFor(route: Route): Promise<Screen | null> {
   switch (route.name) {
     case 'universe':
       return renderUniverse;
     case 'preschool':
       return (await import('./worlds/preschool/preschool')).renderPreschool;
-    case 'zone':
-      return (await import('./worlds/preschool/forest')).renderForest;
+    case 'zone': {
+      const load = ZONE_SCREENS[route.zone];
+      return load ? await load() : null;
+    }
     case 'parent':
       return (await import('./shared/parent-gate')).renderParent;
     default:
@@ -82,8 +126,20 @@ async function render(route: Route): Promise<void> {
   current = null;
 
   const host = el('div', { class: 'screen', attrs: { 'data-route': route.name } });
+  if (route.name === 'zone') host.dataset.zone = route.zone;
   mountPoint.replaceChildren(host);
   document.title = titleFor(route);
+
+  if (route.name === 'zone' && !store.read().enabledZones[route.zone as ZoneId]) {
+    const mounted = renderZoneRest(host, zoneMeta(route.zone)?.title ?? '遊戲區');
+    if (token !== renderToken) {
+      mounted.dispose();
+      return;
+    }
+    current = mounted;
+    host.dataset.ready = 'true';
+    return;
+  }
 
   const screen = await screenFor(route);
   if (token !== renderToken) return;

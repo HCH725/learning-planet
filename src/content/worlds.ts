@@ -45,9 +45,9 @@ export const PRESCHOOL_ZONES: ZoneMeta[] = [
     enabled: true,
     hint: '點動物、餵食物',
   },
-  { id: 'bubbles', title: '彩色泡泡', route: '', icon: '🫧', enabled: false, hint: '即將開放' },
-  { id: 'music', title: '小小音樂屋', route: '', icon: '🎵', enabled: false, hint: '即將開放' },
-  { id: 'shapes', title: '形狀花園', route: '', icon: '🔺', enabled: false, hint: '即將開放' },
+  { id: 'bubbles', title: '彩色泡泡', route: '/world/preschool/bubbles', icon: '🫧', enabled: true, hint: '點破泡泡、畫彩虹' },
+  { id: 'music', title: '小小音樂屋', route: '/world/preschool/music', icon: '🎵', enabled: true, hint: '敲木琴、打鼓、搖鈴' },
+  { id: 'shapes', title: '形狀花園', route: '/world/preschool/shapes', icon: '🔺', enabled: true, hint: '拼形狀、種花' },
 ];
 
 export function enabledWorlds(): WorldMeta[] {

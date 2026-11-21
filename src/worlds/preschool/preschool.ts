@@ -1,6 +1,7 @@
 /**
- * Preschool hub: four large, low-text zone cards. Only the zones that
- * actually exist in this increment are links; the rest are inert labels.
+ * Preschool hub: four large, low-text zone cards. Whether a card opens is the
+ * union of "this zone shipped" and the parent's per-zone switch. A parent who
+ * turns a zone off sees a calm "resting" card, never an error.
  */
 import { PRESCHOOL_ZONES } from '../../content/worlds';
 import { el } from '../../shared/dom';
@@ -28,16 +29,30 @@ export function renderPreschool(host: HTMLElement): Disposable {
   });
 
   const grid = el('ul', { class: 'zone-grid', attrs: { 'aria-label': '遊戲區' } });
-  for (const zone of PRESCHOOL_ZONES) {
+
+  const buildCard = (zone: (typeof PRESCHOOL_ZONES)[number]): HTMLElement => {
+    const open = zone.enabled && store.read().enabledZones[zone.id];
     const icon = el('span', { class: 'zone-card__icon', text: zone.icon, attrs: { 'aria-hidden': 'true' } });
     const title = el('span', { class: 'zone-card__title', text: zone.title });
-    const hint = el('span', { class: 'zone-card__hint', text: zone.enabled ? zone.hint : '即將開放' });
-    const card = zone.enabled
+    const hint = el('span', {
+      class: 'zone-card__hint',
+      text: open ? zone.hint : '休息中（家長可開啟）',
+    });
+    const card = open
       ? el('a', { class: 'zone-card', attrs: { href: zone.route, 'aria-label': `${zone.title}：${zone.hint}` } })
-      : el('div', { class: 'zone-card zone-card--locked', attrs: { 'aria-disabled': 'true' } });
+      : el('div', { class: 'zone-card zone-card--locked', attrs: { 'aria-disabled': 'true', 'data-zone-off': zone.id } });
     card.append(icon, title, hint);
-    grid.append(el('li', {}, card));
-  }
+    return el('li', {}, card);
+  };
+
+  const rebuild = () => {
+    grid.replaceChildren(...PRESCHOOL_ZONES.map(buildCard));
+  };
+  rebuild();
+  const unsubscribe = store.subscribe(() => {
+    rebuild();
+    host.dataset.zones = 'ready';
+  });
 
   host.append(
     el(
@@ -54,5 +69,10 @@ export function renderPreschool(host: HTMLElement): Disposable {
     }),
   );
 
-  return { dispose: () => scope.dispose() };
+  return {
+    dispose() {
+      unsubscribe();
+      scope.dispose();
+    },
+  };
 }

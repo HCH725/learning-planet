@@ -7,18 +7,17 @@
 import { getAudio } from '../../shared/audio';
 import { el } from '../../shared/dom';
 import { createScope, type Disposable } from '../../shared/lifecycle';
-import { requestPin } from '../../shared/parent-gate';
-import { getSettingsStore, type Settings } from '../../shared/settings';
+import { getSettingsStore } from '../../shared/settings';
 import { renderArt } from './forest-art';
 import {
   ANIMALS,
   FOODS,
   canEat,
   createForestState,
-  reminderDue,
   type AnimalId,
   type FoodId,
 } from './forest-model';
+import { createZoneChrome } from './zone-chrome';
 
 const ANIMAL_LABEL: Record<AnimalId, string> = { rabbit: '兔子', duck: '小鴨', dog: '小狗' };
 const FOOD_LABEL: Record<FoodId, string> = { carrot: '紅蘿蔔', bread: '麵包' };
@@ -28,16 +27,12 @@ export function renderForest(host: HTMLElement): Disposable {
   const audio = getAudio();
   const store = getSettingsStore();
   const model = createForestState();
+  const chrome = createZoneChrome({ title: '動物森林', scope, store, backReason: '離開動物森林' });
+  chrome.status.classList.add('forest-status');
+  const setStatus = chrome.setStatus;
 
   let selectedFood: FoodId | null = null;
   let suppressClickUntil = 0;
-  const startedAt = Date.now();
-  let reminderDismissed = false;
-
-  const status = el('p', { class: 'forest-status', attrs: { role: 'status', 'aria-live': 'polite' } });
-  const setStatus = (text: string) => {
-    status.textContent = text;
-  };
 
   // Prefetch only on the forest route; decoding waits for the shared context.
   const recordingIds = ['duck', 'dog', 'rabbit', 'rabbit-rustle', 'duck-eating', 'dog-eating'] as const;
@@ -87,24 +82,6 @@ export function renderForest(host: HTMLElement): Disposable {
     foodButtons.set(food.id, button);
     foodRow.append(el('li', {}, button));
   }
-
-  const muteButton = el('button', {
-    class: 'tool-button',
-    attrs: { type: 'button', 'data-testid': 'mute-toggle', 'aria-pressed': 'false' },
-  }) as HTMLButtonElement;
-  const syncMute = () => {
-    const muted = store.read().audio.master === 0;
-    muteButton.textContent = muted ? '取消靜音' : '靜音';
-    muteButton.setAttribute('aria-pressed', String(muted));
-  };
-  scope.on(muteButton, 'click', () => {
-    soundEpoch++;
-    const current = store.read().audio.master;
-    store.update((value) => ({ ...value, audio: { ...value.audio, master: current === 0 ? 0.65 : 0 } }));
-    syncMute();
-  });
-  const unsubscribe = store.subscribe(syncMute);
-  syncMute();
 
   const selectFood = (foodId: FoodId | null) => {
     selectedFood = foodId;
@@ -231,68 +208,24 @@ export function renderForest(host: HTMLElement): Disposable {
     });
   }
 
-  const breakBanner = el('div', { class: 'break-banner', attrs: { hidden: true } });
-  breakBanner.append(
-    el('p', { text: '玩一下下就好，起來動一動、看看遠方。' }),
-    el('button', {
-      class: 'tool-button',
-      text: '知道了',
-      attrs: { type: 'button', 'data-testid': 'dismiss-break' },
-    }),
-  );
-  scope.on(breakBanner.querySelector('button') as HTMLButtonElement, 'click', () => {
-    reminderDismissed = true;
-    breakBanner.setAttribute('hidden', '');
-  });
-  scope.interval(() => {
-    const settings: Settings = store.read();
-    if (reminderDismissed) return;
-    if (reminderDue(Date.now() - startedAt, settings.breakMinutes)) breakBanner.removeAttribute('hidden');
-  }, 30_000);
-
-  const backLink = el('a', { class: 'back-link', text: '← 回幼兒樂園', attrs: { href: '/world/preschool' } }) as HTMLAnchorElement;
-  scope.on(backLink, 'click', (event) => {
-    event.preventDefault();
-    // No PIN configured yet (first run): never trap the child behind a gate
-    // that cannot be opened.
-    if (!store.read().parentPinHash) {
-      location.assign('/world/preschool');
-      return;
-    }
-    void requestPin('離開動物森林').then((ok) => {
-      if (ok) location.assign('/world/preschool');
-    });
-  });
-
   host.append(
-    el(
-      'header',
-      { class: 'forest-header' },
-      backLink,
-      el('h1', { class: 'forest-title', text: '動物森林' }),
-      el(
-        'div',
-        { class: 'forest-tools' },
-        el('a', { class: 'tool-button', text: '家長', attrs: { href: '/parent' } }),
-        muteButton,
-      ),
-    ),
+    chrome.header,
     el(
       'div',
       { class: 'forest-scene' },
       renderArt('forest', 'forest-bg'),
       animalRow,
       foodRow,
-      breakBanner,
+      chrome.breakBanner,
     ),
-    status,
+    chrome.status,
     el('p', { class: 'forest-hint', text: '點動物聽聲音；把食物拖到動物身上，或先點食物、再點動物。' }),
     el('p', { class: 'forest-note', text: '目前聲音與圖形是本專案的工程測試素材（合成音＋手繪 SVG），不是已核准的正式配音或美術。' }),
   );
 
   return {
     dispose() {
-      unsubscribe();
+      chrome.dispose();
       audio.stopAll();
       void audio.suspend();
       scope.dispose();
