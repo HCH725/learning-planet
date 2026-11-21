@@ -3,7 +3,7 @@
  * hard voice caps and per-sound cooldowns. No audio files: every sound is
  * synthesised here so no third-party asset can leak into the product.
  */
-export type VoiceKind = 'sfx' | 'voice' | 'music';
+export type VoiceKind = 'sfx' | 'voice' | 'music' | 'instrument';
 
 export type Tone = {
   freq: number;
@@ -67,6 +67,7 @@ export const DEFAULT_LIMITS = {
   sfx: 6,
   voice: 1,
   music: 1,
+  instrument: 8,
   /** Same-sound cooldown for tap storms. */
   cooldownMs: 120,
   /** Fade used when leaving a screen or muting. */
@@ -115,8 +116,10 @@ export function createAudioEngine(options: {
   let master: number = limits.master;
   let active = 0;
   let dropped = 0;
-  const activeByKind: Record<VoiceKind, number> = { sfx: 0, voice: 0, music: 0 };
-  const enabled: Record<VoiceKind, boolean> = { sfx: true, voice: true, music: true };
+  const activeByKind: Record<VoiceKind, number> = { sfx: 0, voice: 0, music: 0, instrument: 0 };
+  const enabled: Record<VoiceKind, boolean> = { sfx: true, voice: true, music: true, instrument: true };
+  /** FIFO of live instrument voices, oldest first, for the 8-voice steal. */
+  const instrumentVoices: Array<{ osc: OscillatorLike; gain: GainLike }> = [];
   const lastPlayed = new Map<string, number>();
   let generation = 0;
   const recordings = new Set<AudioBufferSourceNode>();
@@ -140,6 +143,23 @@ export function createAudioEngine(options: {
   const releaseVoice = (kind: VoiceKind) => {
     active = Math.max(0, active - 1);
     activeByKind[kind] = Math.max(0, activeByKind[kind] - 1);
+  };
+
+  /** ponytail: FIFO steal, not priority-aware. Good enough for rapid glockenspiel taps. */
+  const stealOldestInstrument = (): boolean => {
+    const oldest = instrumentVoices.shift();
+    if (!oldest) return false;
+    oldest.osc.onended = null;
+    const now = context?.currentTime ?? 0;
+    try {
+      oldest.gain.gain.setValueAtTime(Math.max(oldest.gain.gain.value, 0.0001), now);
+      oldest.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06);
+      oldest.osc.stop(now + 0.07);
+    } catch {
+      /* node already ended */
+    }
+    releaseVoice('instrument');
+    return true;
   };
 
   const engine: AudioEngine = {
@@ -185,6 +205,12 @@ export function createAudioEngine(options: {
       if (previous !== undefined && stamp - previous < cooldown) {
         dropped += 1;
         return false;
+      }
+      // Instruments steal the oldest voice at the cap; other channels drop.
+      if (spec.kind === 'instrument') {
+        while (activeByKind.instrument >= limits.instrument && instrumentVoices.length > 0) {
+          stealOldestInstrument();
+        }
       }
       if (activeByKind[spec.kind] >= limits[spec.kind]) {
         dropped += 1;
@@ -242,6 +268,10 @@ export function createAudioEngine(options: {
         activeByKind[spec.kind] += 1;
         oscillator.onended = () => {
           releaseVoice(spec.kind);
+          if (spec.kind === 'instrument') {
+            const index = instrumentVoices.findIndex((voice) => voice.osc === oscillator);
+            if (index >= 0) instrumentVoices.splice(index, 1);
+          }
           if (voiceGeneration === generation) {
             try {
               gainNode.disconnect();
@@ -254,6 +284,7 @@ export function createAudioEngine(options: {
         try {
           oscillator.start(start);
           oscillator.stop(end + 0.02);
+          if (spec.kind === 'instrument') instrumentVoices.push({ osc: oscillator, gain: gainNode });
         } catch {
           releaseVoice(spec.kind);
         }
@@ -273,6 +304,8 @@ export function createAudioEngine(options: {
       activeByKind.sfx = 0;
       activeByKind.voice = 0;
       activeByKind.music = 0;
+      activeByKind.instrument = 0;
+      instrumentVoices.length = 0;
       // Voices are fire-and-forget oscillators with short envelopes; bumping the
       // generation detaches their nodes and the master ramp silences them.
       if (masterGain) {
@@ -337,6 +370,7 @@ export function createAudioEngine(options: {
       disposed = true;
       generation += 1;
       active = 0;
+      instrumentVoices.length = 0;
       if (context) {
         try {
           await context.close();

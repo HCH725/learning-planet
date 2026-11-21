@@ -125,6 +125,33 @@ test('concurrent sfx voices are capped at six', async () => {
   engine.dispose();
 });
 
+test('the instrument channel holds eight voices and steals the oldest', async () => {
+  const context = fakeContext();
+  const engine = createAudioEngine({ factory: () => context });
+  await engine.unlock();
+  for (let index = 0; index < 8; index += 1) {
+    assert.equal(engine.play(sound(`instrument-${index}`, 'instrument')), true);
+  }
+  assert.equal(engine.snapshot().activeByKind.instrument, 8);
+  assert.equal(engine.snapshot().dropped, 0);
+  // The ninth voice steals instead of dropping, so rapid play never goes silent.
+  assert.equal(engine.play(sound('instrument-8', 'instrument')), true);
+  const snapshot = engine.snapshot();
+  assert.equal(snapshot.activeByKind.instrument, 8);
+  assert.equal(snapshot.dropped, 0);
+  engine.dispose();
+});
+
+test('instrument and sfx budgets stay independent', async () => {
+  const context = fakeContext();
+  const engine = createAudioEngine({ factory: () => context });
+  await engine.unlock();
+  for (let index = 0; index < 6; index += 1) assert.equal(engine.play(sound(`sfx-${index}`)), true);
+  assert.equal(engine.play(sound('sfx-over')), false, 'sfx still caps at six');
+  assert.equal(engine.play(sound('instrument-a', 'instrument')), true, 'instrument channel is separate');
+  engine.dispose();
+});
+
 test('the voice channel holds exactly one name utterance at a time', async () => {
   const context = fakeContext();
   const engine = createAudioEngine({ factory: () => context });
