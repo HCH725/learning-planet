@@ -40,13 +40,14 @@ export function renderForest(host: HTMLElement): Disposable {
   };
 
   // Prefetch only on the forest route; decoding waits for the shared context.
-  const recordingIds = ['duck', 'dog', 'rabbit'] as const;
+  const recordingIds = ['duck', 'dog', 'rabbit', 'rabbit-rustle', 'duck-eating', 'dog-eating'] as const;
+  type RecordingId = (typeof recordingIds)[number];
   const bytes = new Map(recordingIds.map((id) => [id, fetch(`/assets/preschool/audio/${id}.mp3`)
     .then((res) => res.ok ? res.arrayBuffer() : undefined).catch(() => undefined)]));
-  const buffers = new Map<AnimalId, Promise<AudioBuffer | undefined>>();
+  const buffers = new Map<RecordingId, Promise<AudioBuffer | undefined>>();
   let soundEpoch = 0;
   scope.on(document, 'visibilitychange', () => { if (document.hidden) soundEpoch++; });
-  const playFromGesture = async (id: AnimalId) => {
+  const playFromGesture = async (id: RecordingId) => {
     const enabled = () => !document.hidden && store.read().audio.master > 0 && store.read().audio.sfx;
     if (!enabled()) return;
     const epoch = ++soundEpoch;
@@ -123,7 +124,7 @@ export function renderForest(host: HTMLElement): Disposable {
       button.classList.add('is-petting');
       scope.timeout(() => button.classList.remove('is-petting'), 520);
     }
-    if (animalId !== 'rabbit') void playFromGesture(animalId);
+    void playFromGesture(animalId === 'rabbit' ? 'rabbit-rustle' : animalId);
     setStatus(ANIMAL_LABEL[animalId]);
   };
 
@@ -138,7 +139,7 @@ export function renderForest(host: HTMLElement): Disposable {
         animalButton.classList.add('is-eating');
         scope.timeout(() => animalButton.classList.remove('is-eating'), 760);
       }
-      if (animalId === 'rabbit') void playFromGesture(animalId);
+      void playFromGesture(animalId === 'rabbit' ? 'rabbit' : `${animalId}-eating`);
       setStatus(`${ANIMAL_LABEL[animalId]}吃了${FOOD_LABEL[foodId]}！`);
     } else {
       // Deliberately no error colour, no failure sound, no score change.

@@ -58,8 +58,8 @@ export const gate2Scenarios = [
       await page.waitFor('document.querySelector("[data-animal=\\"rabbit\\"]").classList.contains("is-petting")', { timeout: 2000 });
       check('點動物有短動畫', true);
       check('點動物會報名字', (await forestStatus(page)).includes('兔子'), await forestStatus(page));
-      const afterTap = await diag(page);
-      check('只點兔子不發出假叫聲', afterTap.audio.state === 'none', JSON.stringify(afterTap.audio));
+      await page.waitFor('window.__lp.diag().audio.activeByKind.sfx === 1', { timeout: 2000 });
+      check('點兔子時安排實錄動靜聲', true);
 
       // Rapid taps must not stack voices.
       for (let index = 0; index < 8; index += 1) await page.tap('[data-animal="dog"]');
@@ -107,6 +107,29 @@ export const gate2Scenarios = [
     },
   },
 
+  {
+    id: 'gate2-feeding-audio',
+    title: '餵小鴨與小狗各自播放進食錄音',
+    device: { mobile: true, width: 390, height: 844, deviceScaleFactor: 3 },
+    async run({ page, check }) {
+      for (const [animal, duration] of [['duck', 1.43], ['dog', 1.36]]) {
+        await page.send('Page.addScriptToEvaluateOnNewDocument', { source: `
+          window.clipDurations = [];
+          const start = AudioBufferSourceNode.prototype.start;
+          AudioBufferSourceNode.prototype.start = function (...args) {
+            window.clipDurations.push(this.buffer.duration);
+            return start.apply(this, args);
+          };
+        ` });
+        await page.goto(FOREST);
+        await page.tap('[data-food="bread"]');
+        await page.tap(`[data-animal="${animal}"]`);
+        await page.waitFor('window.clipDurations.length > 0', { timeout: 2500 });
+        const played = await page.eval('return window.clipDurations');
+        check(`${animal} 餵食播放專屬錄音而不是原本的叫聲`, played.length === 1 && Math.abs(played[0] - duration) < 0.05, JSON.stringify(played));
+      }
+    },
+  },
   {
     id: 'gate2-audio-lifecycle',
     title: 'WebAudio：unlock、背景暫停/回前景、靜音持久、pointercancel 取消',
