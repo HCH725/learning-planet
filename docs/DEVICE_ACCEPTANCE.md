@@ -16,8 +16,8 @@
 
 ## 測試網址
 
-手動工程 preview：`https://088a0df9.learning-planet-verify.pages.dev/world/preschool/forest`
-（若已更新部署，以卡片回報的最新 hash 為準；這是 direct-upload preview，不是 production。）
+四區工程 preview：`https://lp-four-zones.learning-planet-verify.pages.dev/world/preschool`
+（若已更新部署，以卡片回報的最新 hash 為準；這是 direct-upload preview，不是 production。舊 `lp-r01` 是 Gate 2 的歷史證據，勿混用。）
 
 ## 必測項目
 
@@ -35,6 +35,16 @@
 12. **3D fallback**：在不支援 WebGL2 或關閉硬體的環境，入口仍可用清單進入幼兒樂園。
 13. **版面**：直向 390 寬與橫向都不出現水平捲動；動物／食物／世界卡至少 72px，家長與靜音鍵至少 64px。
 14. **無外部請求**：Safari 開發者工具／Chrome DevTools Network 過濾 third-party，應為 0（Cloudflare 平台層 NEL report 不算 App 請求）。
+
+## Gate 3 四區追加（2026-11-21）
+
+15. **四區 hub**：四張卡都可進入；家長關閉「彩色泡泡」後卡片顯示「休息中」且不可點；直連 `/world/preschool/bubbles` 顯示柔性休息頁（不是錯誤頁），可按「家長設定」或「回幼兒樂園」。
+16. **彩色泡泡**：點泡泡有「啵」聲與粒子；拖曳有彩虹軌跡且不會誤破泡泡；鍵盤方向鍵換泡泡、Enter 戳破；減少動態時泡泡靜止、無粒子。
+17. **小小音樂屋**：木琴 8 鍵、鼓 3、鈴 2 都敲得出聲；同時五根手指可按五個不同鍵；快速連敲 12 下不破音、不整組掉聲；離開再回來沒有卡住的長音。
+18. **形狀花園**：拖曳形狀到相同形狀凹槽會長出花；放錯形狀安靜回到原位（無紅叉、無失敗音）；先點形狀再點凹槽、以及鍵盤 Enter 拿起／放下都能完成；「重新排」清空。
+19. **跨區一致性**：在任一區按靜音，切到別區仍靜音；家長「減少動態」在四區都生效；每一區「← 回幼兒樂園」都要 PIN（首次無 PIN 直接離開）；四區來回切換不殘留聲音或動畫。
+20. **背景／回前景（四區）**：任一區切到背景不應繼續發聲；回前景後第一次觸控要能正常發聲（iOS 特別確認）。
+21. **無外部請求（四區）**：DevTools Network 過濾 third-party 應為 0；不應出現 CDN 字型、圖片或分析腳本。
 
 ## 判定
 

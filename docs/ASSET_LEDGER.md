@@ -21,4 +21,8 @@
 
 國中學習島嶼星球僅作互動概念參考；不重用原創程式、模型、圖像、角色或教材。未查明權利或未審核的素材不進入預覽／正式產物；外來素材需自託管。
 
+| lp-proc-bubbles | Canvas 2D 程序生成泡泡與粒子 | Learning Planet 專案 | `src/worlds/preschool/bubbles.ts` | 本專案著作；未授予開源授權 | 原創 | 待專案授權決策 | 無 | **pending** | 零外部檔案；工程測試素材 |
+| lp-proc-music | WebAudio 合成木琴／鼓／鈴音色 | Learning Planet 專案 | `src/worlds/preschool/music-model.ts` | 本專案著作；未授予開源授權 | 原創 | 待專案授權決策 | 無 | **pending** | 零取樣檔；工程測試素材 |
+| lp-proc-shapes | inline SVG 形狀片與花朵／樹／小屋 | Learning Planet 專案 | `src/worlds/preschool/shapes.ts` | 本專案著作；未授予開源授權 | 原創 | 待專案授權決策 | 無 | **pending** | 零外部檔案；工程測試素材 |
+
 真人中文名稱語音與背景音樂尚未導入。
