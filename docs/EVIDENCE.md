@@ -28,6 +28,27 @@ npm run test:browser # 產生 production build，跑真實 Chromium（CDP，零�
 3. 未設定家長 PIN 時，離開森林仍被無法通過的 PIN 彈窗擋住，形成死路（改為無 PIN 直接離開）。
 4. `parseSettings` 對缺少 `version` 的資料整包丟棄，等於清掉使用者設定（改為缺 version 視為 v1）。
 
+## 收尾輪（LP-R01，2026-11-21）
+
+基線：PR #2 head `64353772a671d3c7ee7665a471b46e280d4b41d3`（branch `feature/LP-006-gate-2`，base `main` @ `17eae9e`）。本輪未新增玩法、未進 Gate 3、未部署 production。
+
+- **F1（browser test 非確定性）已於 head 修復，本輪只驗證**：`gate2-audio-lifecycle` 改為在 click 前先斷言前景態 `active===0`，click 後另立「新手勢可發聲」斷言，不再把兩件事綁在一起。本輪獨立重跑 **6/6 次全綠、每次 12/12 scenarios**（審計機在 `0ca8b5c` 曾 2/2 FAIL）。改動後再跑 4/4 全綠（含下列新斷言）。
+- **新發現並修復：`gate1-universe-desktop` 的「模式與 canvas 一致」亦為 race**（`data-mode=planet` 在 lazy three chunk 掛載前就設定，立即斷言會偶發 `canvas=0`）。修法為等 canvas 掛載後再斷言，並保留 fallback 分支的 `mode=list && canvas=0` 檢查；4/4 次重跑全綠。此為測試斷言修正，未改產品行為。
+- **F5（照原案 PIN 邊界）**：原案明定「退出 preschool world 或進入家長設定時，才遇到 parent gate」，故幼兒樂園「← 回星球」比照森林加 PIN gate（首次無 PIN 時直接離開，避免死路），並移除過期文案「會在下一階段接上」。新增三項 browser 斷言（文案、攔阻、取消後留在原頁）。
+- **F6（可觸尺寸）**：`.tool-button` 由 48px 提高至 64px；`.back-link` 由 44px 提高至 64px。新增斷言量測家長鍵與靜音鍵實際 box ≥ 64×64（390×844 觸控模擬）。
+- **未變更**：F4（public）依指示不動；branch protection 未動；production 0 筆。
+
+### 本輪測試結果
+
+- `npm test`：**44/44 pass**（`tsc --noEmit` + build + node --test）。
+- `npm run test:browser`：**12/12 scenarios**，連續 6 次全綠（F1 驗證）＋修改後 4 次全綠。
+- 靜態檢查：幼兒路由 0 外部請求、不載入 three chunk；森林 0 外部請求。
+
+### 真機與正式素材（仍缺）
+
+- 真機：本機 `xcrun devicectl`／`xctrace`／`simctl`／`adb` 皆不可用（實測 `unable to find utility`／`command not found`），未購買 BrowserStack。待辦清單見 `docs/DEVICE_ACCEPTANCE.md`；**模擬器與 headless 不算真機**。
+- 真人台灣華語語音：未找到「台灣華語＋真人＋可重散布」的乾淨來源（Freesound CC0 中文語音為環境音／廣播；Wikimedia 為普通話且多 CC BY-SA／GFDL；Lingua Libre 以普通話為主）。三句稿、錄音規格與授權需求見 `docs/VOICE_RECORDING_BRIEF.md`。**不以 TTS 冒充真人**。
+
 ## 已知不足／待驗（不得標為通過）
 
 - **真機**（iPhone／iPad／Android）：未驗。真機音訊解鎖、鎖屏恢復、引導使用模式屬真機項目。
