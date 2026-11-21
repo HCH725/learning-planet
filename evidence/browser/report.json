@@ -1,0 +1,1125 @@
+{
+  "startedAt": "2026-11-21T03:51:02.275Z",
+  "finishedAt": "2026-11-21T03:51:29.882Z",
+  "chrome": "Google Chrome for Testing 148.0.7778.96",
+  "baseUrl": "http://127.0.0.1:4173",
+  "mode": "headless",
+  "results": [
+    {
+      "id": "gate1-universe-desktop",
+      "title": "桌面：星球入口有 3D 或清單，且世界清單可導航",
+      "ok": true,
+      "ms": 510,
+      "checks": [
+        {
+          "label": "入口渲染 universe 路由",
+          "ok": true,
+          "detail": "got universe"
+        },
+        {
+          "label": "世界清單有五個世界",
+          "ok": true,
+          "detail": "got 5"
+        },
+        {
+          "label": "只有 preschool 可以進入",
+          "ok": true,
+          "detail": "[{\"title\":\"學齡前幼兒樂園\",\"href\":\"/world/preschool\",\"locked\":false}]"
+        },
+        {
+          "label": "模式與 canvas 一致",
+          "ok": true,
+          "detail": "mode=planet"
+        },
+        {
+          "label": "WebGL2 可用時載入 3D 星球",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "3D 星球載入 three chunk",
+          "ok": true,
+          "detail": "no three request"
+        },
+        {
+          "label": "入口沒有 console error",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有第三方請求",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate1-preschool-no-three",
+      "title": "幼兒路由不載入 Three.js chunk（直接 deep link，生產 build）",
+      "ok": true,
+      "ms": 500,
+      "checks": [
+        {
+          "label": "deep link 直接進入 preschool",
+          "ok": true,
+          "detail": "got preschool"
+        },
+        {
+          "label": "幼兒首頁有四張大卡",
+          "ok": true,
+          "detail": "got 4"
+        },
+        {
+          "label": "四區都是可玩的區域",
+          "ok": true,
+          "detail": "[{\"title\":\"動物森林\",\"href\":\"/world/preschool/forest\"},{\"title\":\"彩色泡泡\",\"href\":\"/world/preschool/bubbles\"},{\"title\":\"小小音樂屋\",\"href\":\"/world/preschool/music\"},{\"title\":\"形狀花園\",\"href\":\"/world/preschool/shapes\"}]"
+        },
+        {
+          "label": "幼兒路由完全沒有 three 請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "幼兒路由沒有 canvas",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "對照組：入口確實會載入 three chunk",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-webgl-blocked",
+      "title": "WebGL 被封鎖時仍能完整導航（不是錯誤頁）",
+      "ok": true,
+      "ms": 580,
+      "checks": [
+        {
+          "label": "無 WebGL 時顯示清單模式",
+          "ok": true,
+          "detail": "mode=list"
+        },
+        {
+          "label": "無 WebGL 時不建立 canvas",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "無 WebGL 時入口仍可導航",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "清單可進入幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "fallback 不是錯誤頁",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-reduced-motion",
+      "title": "prefers-reduced-motion 明顯減少動態（並保留對照組）",
+      "ok": true,
+      "ms": 448,
+      "checks": [
+        {
+          "label": "瀏覽器回報 reduced motion",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "reduced motion 時不啟動 3D",
+          "ok": true,
+          "detail": "mode=list"
+        },
+        {
+          "label": "reduced motion 時說明文字存在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "reduced motion 時沒有 three 請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "對照組：偏好可還原",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-mobile-hub",
+      "title": "行動模擬（390×844 觸控）：大目標、可導航、不溢出",
+      "ok": true,
+      "ms": 1167,
+      "checks": [
+        {
+          "label": "四個遊戲區都顯示",
+          "ok": true,
+          "detail": "got 4"
+        },
+        {
+          "label": "每個遊戲區 ≥ 72px 高",
+          "ok": true,
+          "detail": "[{\"width\":358,\"height\":144},{\"width\":358,\"height\":144},{\"width\":358,\"height\":144},{\"width\":358,\"height\":144}]"
+        },
+        {
+          "label": "沒有水平溢出",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "觸控可回到星球",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "觸控可再進入幼兒樂園",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate1-teardown",
+      "title": "路由往返 4 次後沒有殘留 scope／timer／listener",
+      "ok": true,
+      "ms": 3180,
+      "checks": [
+        {
+          "label": "入口有 app + 畫面兩個 scope",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":11,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "第 1 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 2 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 3 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "第 4 次進入幼兒樂園後只有 app + 畫面 scope",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "往返後 scope 數量回到 2",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":11,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "往返後沒有殘留 timer",
+          "ok": true,
+          "detail": "{\"route\":\"universe\",\"scopes\":2,\"timers\":0,\"frames\":1,\"listeners\":11,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "往返後沒有殘留 listener",
+          "ok": true,
+          "detail": "11 -> 11"
+        },
+        {
+          "label": "RAF 數量與目前畫面一致",
+          "ok": true,
+          "detail": "1 vs 1"
+        },
+        {
+          "label": "指標 element 沒有殘留 canvas 堆疊",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate2-touch-first-sound",
+      "title": "首次觸控等待音訊解鎖，仍播放同一次點擊的音效",
+      "ok": true,
+      "ms": 512,
+      "checks": [
+        {
+          "label": "同一次小鴨觸控確實安排了發聲",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate2-forest-core",
+      "title": "動物森林：三動物兩食物、點擊、拖曳、錯誤投放、替代操作",
+      "ok": true,
+      "ms": 3583,
+      "checks": [
+        {
+          "label": "直接 deep link 進入動物森林",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "三個動物都在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "兩種食物都在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "動物有可存取名稱",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "幼兒路由不載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有第三方請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "家長與靜音鍵至少 64x64",
+          "ok": true,
+          "detail": "[[66,64],[66,64]]"
+        },
+        {
+          "label": "點動物有短動畫",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "點動物會報名字",
+          "ok": true,
+          "detail": "兔子"
+        },
+        {
+          "label": "點兔子時安排實錄動靜聲",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "連點不會超過 sfx 上限 6",
+          "ok": true,
+          "detail": "{\"sfx\":2,\"voice\":0,\"music\":0,\"instrument\":0}"
+        },
+        {
+          "label": "連點被 cooldown 丟棄而非堆疊",
+          "ok": true,
+          "detail": "{\"unlocked\":true,\"state\":\"running\",\"active\":2,\"activeByKind\":{\"sfx\":2,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":6,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "拖曳紅蘿蔔給兔子會吃掉",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "餵兔子會排程咀嚼錄音",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "錯放只回原位，不顯示錯誤",
+          "ok": true,
+          "detail": "小鴨不喜歡紅蘿蔔，食物回到原位。"
+        },
+        {
+          "label": "錯放不加錯誤樣式",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "點食物會進入拿取狀態",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "先點食物再點動物也能餵食",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "餵食後食物不再被選取",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "鍵盤可以拿起食物",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "鍵盤可以完成餵食（拖曳替代操作）",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate2-feeding-audio",
+      "title": "餵小鴨與小狗各自播放進食錄音",
+      "ok": true,
+      "ms": 1012,
+      "checks": [
+        {
+          "label": "duck 餵食播放專屬錄音而不是原本的叫聲",
+          "ok": true,
+          "detail": "[1.43]"
+        },
+        {
+          "label": "dog 餵食播放專屬錄音而不是原本的叫聲",
+          "ok": true,
+          "detail": "[1.36]"
+        }
+      ]
+    },
+    {
+      "id": "gate2-audio-lifecycle",
+      "title": "WebAudio：unlock、背景暫停/回前景、靜音持久、pointercancel 取消",
+      "ok": true,
+      "ms": 1082,
+      "checks": [
+        {
+          "label": "手勢前沒有 AudioContext 在跑",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "真實滑鼠手勢解鎖音訊",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "切到背景後音訊暫停",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "背景時沒有殘留發聲",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "背景狀態有標記在 DOM",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "回前景會嘗試 resume",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "回前景沒有自動重播音效",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "回前景後的新手勢可以觸發音效",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "靜音立即生效",
+          "ok": true,
+          "detail": "{\"unlocked\":true,\"state\":\"running\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":true,\"master\":0,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "靜音按鈕有 aria-pressed",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "靜音在重新載入後仍有效",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":true,\"master\":0,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "pointercancel 會讓食物回原位",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "pointercancel 不會觸發吃東西",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "pointercancel 後沒有錯誤樣式",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate2-parent-pin",
+      "title": "家長區：四位 PIN 建立、錯誤拒絕、正確解鎖、設定持久、離開被攔",
+      "ok": true,
+      "ms": 2089,
+      "checks": [
+        {
+          "label": "第一次進入是建立 PIN",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "家長區沒有直接顯示設定",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "設定 PIN 後才看到家長設定",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "PIN 只存雜湊，不存明碼",
+          "ok": true,
+          "detail": "{\"version\":1,\"audio\":{\"master\":0.65,\"music\":true,\"sfx\":true,\"voice\":true},\"reducedMotion\":false,\"breakMinutes\":20,\"enabl"
+        },
+        {
+          "label": "重新載入後要求輸入 PIN",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "錯誤 PIN 被拒絕",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "正確 PIN 可解鎖",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "靜音設定跨重新載入保留",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "減少動態設定寫入 document 旗標",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "離開幼兒區會被家長 PIN 攔下",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "取消後仍留在動物森林",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "正確 PIN 可離開動物森林",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "幼兒樂園文案不再標示 PIN 待接上",
+          "ok": true,
+          "detail": "家長設定與離開幼兒樂園都需要家長 PIN。"
+        },
+        {
+          "label": "離開幼兒樂園首頁會被家長 PIN 攔下",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "取消後仍留在幼兒樂園",
+          "ok": true,
+          "detail": null
+        }
+      ]
+    },
+    {
+      "id": "gate2-teardown",
+      "title": "森林路由往返 4 次：scope／audio／listener 不累積",
+      "ok": true,
+      "ms": 1017,
+      "checks": [
+        {
+          "label": "幼兒首頁只有 app + 畫面 scope",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "往返後 scope 回到 2",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "往返後沒有殘留 timer",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "往返後沒有殘留 listener",
+          "ok": true,
+          "detail": "6 -> 6"
+        },
+        {
+          "label": "離開森林後沒有發聲殘留",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "離開森林後音訊暫停",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "畫面上沒有殘留 canvas",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate3-hub-four-zones",
+      "title": "幼兒首頁：四區卡片、家長逐區開關、直連休息頁",
+      "ok": true,
+      "ms": 382,
+      "checks": [
+        {
+          "label": "首頁有四張遊戲卡",
+          "ok": true,
+          "detail": "[\"動物森林\",\"彩色泡泡\",\"小小音樂屋\",\"形狀花園\"]"
+        },
+        {
+          "label": "四區都有可用連結",
+          "ok": true,
+          "detail": "[{\"title\":\"動物森林\",\"href\":\"/world/preschool/forest\",\"locked\":false,\"hint\":\"點動物、餵食物\"},{\"title\":\"彩色泡泡\",\"href\":\"/world/preschool/bubbles\",\"locked\":false,\"hint\":\"點破泡泡、畫彩虹\"},{\"title\":\"小小音樂屋\",\"href\":\"/world/preschool/music\",\"locked\":false,\"hint\":\"敲木琴、打鼓、搖鈴\"},{\"title\":\"形狀花園\",\"href\":\"/world/preschool/shapes\",\"locked\":false,\"hint\":\"拼形狀、種花\"}]"
+        },
+        {
+          "label": "沒有「即將開放」字樣",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "forest 深連結可進入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "forest 標題正確",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "forest 不載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "bubbles 深連結可進入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "bubbles 標題正確",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "bubbles 不載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "music 深連結可進入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "music 標題正確",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "music 不載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "shapes 深連結可進入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "shapes 標題正確",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "shapes 不載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "家長關閉泡泡後卡片休息中且無連結",
+          "ok": true,
+          "detail": "{\"locked\":true,\"href\":null,\"hint\":\"休息中（家長可開啟）\"}"
+        },
+        {
+          "label": "直連被關閉的區顯示休息頁",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "休息頁不是 not-found",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "休息頁有回幼兒樂園與家長設定",
+          "ok": true,
+          "detail": "[\"/parent\",\"/world/preschool\"]"
+        },
+        {
+          "label": "休息頁沒有跳出 PIN",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "家長開回後可再進入",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "沒有第三方請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate3-bubbles-core",
+      "title": "彩色泡泡：數量、點破、拖曳軌跡、pointercancel、鍵盤、減動態",
+      "ok": true,
+      "ms": 2244,
+      "checks": [
+        {
+          "label": "泡泡數量在 10–30 之間",
+          "ok": true,
+          "detail": "10"
+        },
+        {
+          "label": "泡泡直徑至少 76px",
+          "ok": true,
+          "detail": "[47,54,42,49,42,42,52,50,54,44]"
+        },
+        {
+          "label": "畫布有可存取名稱",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "拖曳留下彩虹軌跡",
+          "ok": true,
+          "detail": "3"
+        },
+        {
+          "label": "拖曳不會戳破泡泡",
+          "ok": true,
+          "detail": "{\"before\":10,\"after\":10}"
+        },
+        {
+          "label": "點泡泡會破並回報",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "點泡泡有 WebAudio 合成音效",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "pointercancel 不戳破泡泡",
+          "ok": true,
+          "detail": "{\"id\":1}"
+        },
+        {
+          "label": "鍵盤可以戳破泡泡",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "減動態下泡泡靜止",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "減動態下仍可戳破且沒有粒子",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate3-music-core",
+      "title": "小小音樂屋：13 樂器、尺寸、五指上限、鍵盤、樂器聲道上限、teardown",
+      "ok": true,
+      "ms": 1184,
+      "checks": [
+        {
+          "label": "木琴 8 鍵、鼓 3、鈴 2",
+          "ok": true,
+          "detail": "{\"total\":13,\"xylo\":8,\"drum\":3,\"bell\":2}"
+        },
+        {
+          "label": "總共 13 個樂器",
+          "ok": true,
+          "detail": "13"
+        },
+        {
+          "label": "木琴每鍵至少 72x72",
+          "ok": true,
+          "detail": "[[74,72],[74,72],[74,72],[74,72],[74,72],[74,72],[74,72],[74,72]]"
+        },
+        {
+          "label": "鼓與鈴至少 96x96",
+          "ok": true,
+          "detail": "[[102,96],[102,96],[102,96],[120,96],[120,96]]"
+        },
+        {
+          "label": "工具鍵至少 64x64",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "觸控敲木琴會發聲",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "同時最多接受五個 pointer",
+          "ok": true,
+          "detail": "{\"zone\":\"music\",\"activePointers\":5,\"instruments\":13,\"accepted\":1,\"pointers\":[\"xylo-0\",\"xylo-1\",\"xylo-2\",\"xylo-3\",\"xylo-4\"]}"
+        },
+        {
+          "label": "鍵盤 1–8 可以演奏",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "樂器聲道不超過 8 聲",
+          "ok": true,
+          "detail": "{\"unlocked\":true,\"state\":\"running\",\"active\":8,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":8},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "滿 8 聲時以最舊釋放取代丟棄",
+          "ok": true,
+          "detail": "0 -> 0"
+        },
+        {
+          "label": "離開音樂屋後沒有殘留 scope",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "離開音樂屋後沒有殘留 timer",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "離開音樂屋後沒有殘留 frame",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "離開音樂屋後沒有發聲殘留",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate3-shapes-core",
+      "title": "形狀花園：9 片、自由拖曳、配對成功／失敗、點選替代、鍵盤、減動態、teardown",
+      "ok": true,
+      "ms": 4517,
+      "checks": [
+        {
+          "label": "九片形狀都在",
+          "ok": true,
+          "detail": "9"
+        },
+        {
+          "label": "每片至少 72x72",
+          "ok": true,
+          "detail": "[{\"id\":\"circle-coral\",\"w\":76,\"h\":76},{\"id\":\"circle-gold\",\"w\":76,\"h\":76},{\"id\":\"circle-teal\",\"w\":76,\"h\":76},{\"id\":\"triangle-coral\",\"w\":76,\"h\":76},{\"id\":\"triangle-gold\",\"w\":76,\"h\":76},{\"id\":\"triangle-teal\",\"w\":76,\"h\":76},{\"id\":\"square-coral\",\"w\":76,\"h\":76},{\"id\":\"square-gold\",\"w\":76,\"h\":76},{\"id\":\"square-teal\",\"w\":76,\"h\":76}]"
+        },
+        {
+          "label": "自由模式可以拖到舞台其他位置",
+          "ok": true,
+          "detail": "{\"beforeFree\":{\"left\":48,\"top\":274},\"afterFree\":{\"left\":157,\"top\":472},\"fieldBox\":{\"x\":195,\"y\":408,\"width\":326,\"height\":288}}"
+        },
+        {
+          "label": "切到簡單配對",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "三個凹槽都在",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "形狀正確會放進凹槽",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "凹槽有已填狀態",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "長出一個花園元素",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "錯放只回原位不顯示錯誤",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "錯放不加錯誤樣式",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "錯放不改變凹槽",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "點形狀會拿起",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "先點形狀再點凹槽也能配對",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "鍵盤可以拿起形狀",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "鍵盤可以完成一次配對",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "三個凹槽填滿後小花園完成",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "重新排會清空凹槽",
+          "ok": true,
+          "detail": "{\"zone\":\"shapes\",\"mode\":\"match\",\"selected\":null,\"filled\":0,\"complete\":false,\"garden\":[]}"
+        },
+        {
+          "label": "減動態下花園元素不做動畫",
+          "ok": true,
+          "detail": "1e-06s"
+        },
+        {
+          "label": "離開形狀花園後沒有殘留 scope",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "離開形狀花園後沒有殘留 timer",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"suspended\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "id": "gate3-integration",
+      "title": "四區整合：往返切換、teardown、靜音跨區、減動態、零外部請求",
+      "ok": true,
+      "ms": 1604,
+      "checks": [
+        {
+          "label": "首頁基線只有 app + 畫面 scope",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "從首頁可進入 動物森林",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "動物森林 可回到幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "從首頁可進入 彩色泡泡",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "彩色泡泡 可回到幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "從首頁可進入 小小音樂屋",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "小小音樂屋 可回到幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "從首頁可進入 形狀花園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "形狀花園 可回到幼兒樂園",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "四區往返後 scope 回到基線",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "四區往返後 timer 歸零",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "四區往返後 frame 歸零",
+          "ok": true,
+          "detail": "{\"route\":\"preschool\",\"scopes\":2,\"timers\":0,\"frames\":0,\"listeners\":6,\"audio\":{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}}"
+        },
+        {
+          "label": "四區往返後 listener 回到基線",
+          "ok": true,
+          "detail": "6 -> 6"
+        },
+        {
+          "label": "四區往返後沒有發聲殘留",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":false,\"master\":0.65,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "泡泡區靜音立即生效",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":true,\"master\":0,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "靜音狀態標記在 DOM",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "靜音跨區仍然有效",
+          "ok": true,
+          "detail": "{\"unlocked\":false,\"state\":\"none\",\"active\":0,\"activeByKind\":{\"sfx\":0,\"voice\":0,\"music\":0,\"instrument\":0},\"dropped\":0,\"muted\":true,\"master\":0,\"enabled\":{\"sfx\":true,\"voice\":true,\"music\":true,\"instrument\":true}}"
+        },
+        {
+          "label": "音樂屋靜音鍵同步",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "可以取消靜音",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "減少動態跨區生效",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "減少動態下泡泡靜止",
+          "ok": true,
+          "detail": null
+        },
+        {
+          "label": "四區都沒有載入 three",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有第三方請求",
+          "ok": true,
+          "detail": ""
+        },
+        {
+          "label": "沒有 console error",
+          "ok": true,
+          "detail": ""
+        }
+      ]
+    }
+  ]
+}
