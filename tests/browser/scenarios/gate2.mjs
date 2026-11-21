@@ -53,6 +53,12 @@ export const gate2Scenarios = [
       check('幼兒路由不載入 three', threeRequested(page).length === 0, threeRequested(page).join(','));
       check('沒有第三方請求', externalRequests(page, baseUrl).length === 0, externalRequests(page, baseUrl).join(','));
 
+      // Secondary tool controls are still child-reachable: the plan's 64x64
+      // floor for important navigation applies to the parent/mute buttons.
+      // (The break banner's dismiss button shares the class but is hidden here.)
+      const toolSizes = await page.eval('return [document.querySelector("a.tool-button"), document.querySelector("[data-testid=\\"mute-toggle\\"]")].map((node) => { const box = node.getBoundingClientRect(); return [Math.round(box.width), Math.round(box.height)]; })');
+      check('家長與靜音鍵至少 64x64', toolSizes.every(([w, h]) => w >= 64 && h >= 64), JSON.stringify(toolSizes));
+
       // Tap = pet: animation class, name announced, audio unlocked by the gesture.
       await page.tap('[data-animal="rabbit"]');
       await page.waitFor('document.querySelector("[data-animal=\\"rabbit\\"]").classList.contains("is-petting")', { timeout: 2000 });
@@ -240,6 +246,16 @@ export const gate2Scenarios = [
       await page.eval('return document.querySelector(".pin-overlay .pin-submit").click()');
       await page.waitForRoute('preschool');
       check('正確 PIN 可離開動物森林', true);
+
+      // Same boundary on the hub: leaving the preschool world for the planet
+      // entrance is gated, and the note no longer promises a later phase.
+      const note = await page.eval('return document.querySelector(".preschool-note").textContent');
+      check('幼兒樂園文案不再標示 PIN 待接上', !note.includes('下一階段'), note);
+      await page.tap('a.back-link');
+      await page.waitFor('!!document.querySelector("[data-testid=\\"pin-overlay\\"]")', { timeout: 3000 });
+      check('離開幼兒樂園首頁會被家長 PIN 攔下', true);
+      await page.eval('return document.querySelector(".pin-cancel").click()');
+      check('取消後仍留在幼兒樂園', (await page.eval('return location.pathname')) === '/world/preschool');
       await page.screenshot('gate2-parent-pin');
     },
   },

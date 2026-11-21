@@ -37,17 +37,21 @@ export const gate1Scenarios = [
       const open = worlds.filter((world) => world.href);
       check('只有 preschool 可以進入', open.length === 1 && open[0].href === '/world/preschool', JSON.stringify(open));
 
-      const mode = await page.eval('return document.querySelector(".planet-stage").dataset.mode');
-      const canvas = await page.eval('return document.querySelectorAll(".planet-canvas").length');
-      check('模式與 canvas 一致', (mode === 'planet') === (canvas === 1), `mode=${mode} canvas=${canvas}`);
-
       const webgl2 = await page.eval('return !!document.createElement("canvas").getContext("webgl2")');
+      const stageMode = () => page.eval('return document.querySelector(".planet-stage").dataset.mode');
+      const canvasCount = () => page.eval('return document.querySelectorAll(".planet-canvas").length');
       if (webgl2) {
+        // The stage flips to "planet" before the lazy three chunk resolves, so the
+        // canvas appears later. Wait for the mount, then assert mode and DOM agree.
         await page.waitFor('document.querySelectorAll(".planet-canvas").length === 1', { timeout: 4000, message: 'planet canvas' });
+        const settledMode = await stageMode();
+        check('模式與 canvas 一致', settledMode === 'planet' && (await canvasCount()) === 1, `mode=${settledMode}`);
         check('WebGL2 可用時載入 3D 星球', true);
         check('3D 星球載入 three chunk', threeRequested(page).length > 0, 'no three request');
       } else {
-        check('WebGL2 不可用時退回清單模式', mode === 'list', `mode=${mode}`);
+        const fallbackMode = await stageMode();
+        check('模式與 canvas 一致', fallbackMode === 'list' && (await canvasCount()) === 0, `mode=${fallbackMode}`);
+        check('WebGL2 不可用時退回清單模式', fallbackMode === 'list', `mode=${fallbackMode}`);
       }
 
       check('入口沒有 console error', page.consoleErrors.length === 0, page.consoleErrors.join(' | '));
