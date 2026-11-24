@@ -220,7 +220,7 @@ export function renderForest(host: HTMLElement): Disposable {
     ),
     chrome.status,
     el('p', { class: 'forest-hint', text: '點動物聽聲音；把食物拖到動物身上，或先點食物、再點動物。' }),
-    el('p', { class: 'forest-note', text: '目前聲音與圖形是本專案的工程測試素材（合成音＋手繪 SVG），不是已核准的正式配音或美術。' }),
+    el('p', { class: 'forest-note', text: '目前聲音為本專案自託管的 Freesound CC0 實錄、圖形為手繪 SVG；兩者皆為工程測試素材，不是已核准的正式配音或美術。' }),
   );
 
   return {

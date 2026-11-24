@@ -18,5 +18,6 @@
 | 3 | （自動化）形狀花園：9 片、拖曳、配對成功／失敗、點選替代、鍵盤、減動態 | gate3-shapes-core（21 checks） |
 | 3 | （自動化）四區切換、teardown、靜音／減動態跨區、零外部請求 | gate3-integration（24 checks） |
 | 3 | 真機四區矩陣、線上 preview 深連結與標頭、真人聽測 | 線上 preview 已驗（direct-upload）；真機**待驗**（`docs/DEVICE_ACCEPTANCE.md`） |
+| 3 | （CI）非阻塞 browser job（不列入 required checks） | `.github/workflows/browser.yml`；PR 與 `workflow_dispatch` |
 
 沒有實機或預覽結果的項目標未驗，不以桌面或設定檔替代。
