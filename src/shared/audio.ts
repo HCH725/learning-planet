@@ -1,7 +1,8 @@
 /**
  * One shared AudioContext, one master chain (gain -> limiter -> destination),
- * hard voice caps and per-sound cooldowns. No audio files: every sound is
- * synthesised here so no third-party asset can leak into the product.
+ * hard voice caps and per-sound cooldowns. Sounds are either synthesised
+ * here or decoded from self-hosted buffers (the preschool forest recordings);
+ * no third-party runtime fetch can leak into the product.
  */
 export type VoiceKind = 'sfx' | 'voice' | 'music' | 'instrument';
 

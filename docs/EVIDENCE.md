@@ -51,7 +51,7 @@ npm run test:browser # 產生 production build，跑真實 Chromium（CDP，零�
 
 ## Gate 3 工程輪（四區整合，2026-11-21）
 
-基線：PR #2 head `06f9d1d`；程式 head `f8b1872`（`c39c63d` audio instrument、`bdf4c89` 三區＋整合、`f8b1872` 測試）。**不宣告 Gate 2 PASS、不 merge、不部署 production**；本節是工程預覽證據，不是正式驗收。
+基線：PR #2 head `06f9d1d`；程式 head `f8b1872`（`c39c63d` audio instrument、`bdf4c89` 三區＋整合、`f8b1872` 測試）；最終 head `3af8bf7`（docs-only）。**不宣告 Gate 2 PASS、不 merge、不部署 production**；本節是工程預覽證據，不是正式驗收。
 
 ### 變更摘要
 
@@ -72,10 +72,10 @@ npm run test:browser # 產生 production build，跑真實 Chromium（CDP，零�
 ### 線上預覽核驗（direct-upload，非 production）
 
 - 部署分支 `lp-four-zones`；alias `https://lp-four-zones.learning-planet-verify.pages.dev`（保留 `lp-r01` 舊證據鏈未動）。
-- hub 與四區 deep link 共五條路徑皆 **200**；alias 與 hash URL 服務同一組資產 `index-DzWHsm5s.js` ＋ `index-CS38DQsM.css`，與程式 head `f8b1872` 的 clean build 完全一致。
+- hub 與四區 deep link 共五條路徑皆 **200**；alias 與 hash URL 服務同一組資產 `index-DzWHsm5s.js` ＋ `index-CS38DQsM.css`，與程式 head `f8b1872` 的 clean build 完全一致（`3af8bf7` 僅新增文件，資產不變）。
 - 六項安全標頭在 hub 與 zone：CSP、X-Content-Type-Options、X-Frame-Options、Referrer-Policy、Permissions-Policy、X-Robots-Tag。
 - production root（`learning-planet-verify.pages.dev`）維持 **404**；GitHub deployments **0**。
-- exact-head CI run `44863429299` **success**（job `baseline` @ `f8b1872`）。
+- 程式 head CI run `44863429299` **success**（job `baseline` @ `f8b1872`）；最終 head CI run `44863719043` **success**（@ `3af8bf7`）。
 
 ### 本輪抓到的真問題（已修）
 
@@ -94,7 +94,7 @@ npm run test:browser # 產生 production build，跑真實 Chromium（CDP，零�
 
 - **真機**（iPhone／iPad／Android）：未驗。真機音訊解鎖、鎖屏恢復、引導使用模式屬真機項目。
 - **線上 Cloudflare Pages／正式 response headers**：本輪 direct-upload 預覽已驗（五條路徑 200、六項標頭、資產綁定）；**Git-linked preview（Cloudflare Git App）仍未驗**。
-- **正式素材**：全部為工程測試素材。圖形為本專案原創 inline SVG；音效為 WebAudio 程序化合成；**真人中文語音尚未確認**，名稱僅以合成提示音表示。`docs/ASSET_LEDGER.md` 的 `approved_by` 皆為 `pending`。
+- **正式素材**：全部為工程測試素材。圖形為本專案原創 inline SVG；森林點擊／餵食為 6 段自託管 Freesound CC0 實錄，泡泡／音樂／形狀音效為 WebAudio 程序化合成；**真人中文語音尚未確認**，名稱僅以畫面文字＋`aria-live` 表示。`docs/ASSET_LEDGER.md` 的正式美術欄位仍待 `approved_by`；phase 1 工程測試素材已由專案擁有人於 2026-11-24 接受。
 - **回前景硬體音訊恢復**：headless Chrome 無音訊裝置，腳本 suspend 後不會回到 `running`；已驗證的是「背景暫停、無殘留發聲、回前景清除 hidden 旗標並嘗試 resume」。硬體層恢復列真機待驗。
 - **效能預算**（60／30 FPS、long task）未量測；three chunk 742.8 kB（gzip 187.7 kB）僅在入口 lazy 載入，未做進一步瘦身。
 - **介入偵測**：`window.__lp.diag()` 是唯讀工程診斷（scope／timer／frame／listener／audio 狀態），不含個資。
